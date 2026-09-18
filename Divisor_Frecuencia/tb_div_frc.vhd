@@ -10,6 +10,7 @@ architecture test of divisor_tb is
     signal s_CLK_DIV : std_logic := '0';
     signal s_RST_IN  : std_logic := '0';
     signal s_LED     : std_logic;
+    signal s_LED2    : std_logic; -- << CAMBIO 1: Señal para el segundo LED
     signal s_LED_EX  : std_logic;
 
     -- Periodo de reloj (100 MHz -> 10 ns)
@@ -26,6 +27,7 @@ begin
             CLK_DIV => s_CLK_DIV,
             RST_IN  => s_RST_IN,
             LED     => s_LED,
+            LED2    => s_LED2,   -- << CAMBIO 2: Mapeo de LED2
             LED_EX  => s_LED_EX
         );
 
@@ -44,20 +46,21 @@ begin
     -- Proceso de estímulos
     stim_proc: process
     begin
-        -- 1. Mantener reset en '0' durante los primeros 40 ns (Reset asíncrono activo en bajo)
+        -- 1. Reset activo en bajo durante 40 ns
         s_RST_IN <= '0';
         wait for 40 ns;
 
-        -- 2. Liberar reset a '1' para permitir que el contador empiece a contar
+        -- 2. Liberar reset
         s_RST_IN <= '1';
 
-        -- 3. Tiempo de simulación:
-        -- NOTA: Con TOTAL_PERIOD = 500_000_000, un ciclo completo requiere 5 segundos reales de tiempo simulado.
-        -- Si solo quieres verificar que arranca y cuenta, espera un tiempo moderado:
-        wait for 1000 ns;
-
-        -- Si quieres simular un ciclo completo, cambia el valor de TOTAL_PERIOD temporalmente
-        -- en divisor.vhd a un número pequeño (ej. 10 y WAIT_BOUNDARY a 5).
+        -- << CAMBIO 3: Tiempo de simulación suficiente
+        -- IMPORTANTE: Asegurate de haber cambiado en divisor.vhd:
+        -- constant TOTAL_PERIOD  : integer := 20;
+        -- constant WAIT_BOUNDARY : integer := 10;
+        -- Cada parpadeo tomara 20 * 10 ns = 200 ns.
+        -- Para ver 5 parpadeos completos (y ver encender y apagar LED2):
+        -- 5 parpadeos * 200 ns = 1000 ns + 40 ns de reset = ~1040 ns.
+        wait for 1500 ns;
 
         sim_finished <= true;
         wait;
